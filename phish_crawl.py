@@ -41,7 +41,6 @@ def savePicture(filename, url):
 		iframe = soup.find('iframe')
 		suffix = iframe['src']
 		image_url = "http://www.phishtank.com/" + suffix
-		# image_url = suffix
 		print image_url
 		req = urllib2.Request(image_url, None, req_header)
 		resp = urllib2.urlopen(req, None, req_timeout)
@@ -89,9 +88,9 @@ def urlcrawl(url_prefix, url_surffix):
 				if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2010":
 					end_data = 1
 					break
-				page_url = ins[1].contents[0]
-				valid = ins[3].contents[0]
-				online = ins[4].contents[0]
+				page_url = ins[1].get_text().split(" ")[0][:-5]
+				valid = ins[3].get_text()
+				online = ins[4].get_text()
 				img_url = "https://www.phishtank.com/phish_detail.php?phish_id=" + str(phish_id)
 				comment_sql = QUERYSQL.format(phish_id = phish_id)
 				cursor.execute(comment_sql)
@@ -104,23 +103,28 @@ def urlcrawl(url_prefix, url_surffix):
 						online = row[4] + "|" + online
 						submission_time = row[2] + "|" + submission_time
 						page_url = row[1] + "|" + page_url
-
+						print page_url
+						print online
+						print valid
+						print submission_time
 						comment_sql = UPDATESQL.format(submission_time = submission_time,\
 							url = page_url,\
 							valid = valid,\
 							online = online)
-						savePicture(str(phish_id)+"_"+str(len(row[3].split("|") ) ), img_url)
+						#savePicture(str(phish_id)+"_"+str(len(row[3].split("|") ) ), img_url)
 						cursor.execute(comment_sql)
+						conn.commit()
 				else:
-
+					print online 
+					print valid
 					comment_sql = INSERTSQL.format(phish_id = phish_id, \
 						submission_time = submission_time,\
 						url = page_url,\
 						valid = valid,\
 						online = online)
-					savePicture(str(phish_id), img_url)
+					#savePicture(str(phish_id), img_url)
 					cursor.execute(comment_sql)
-
+					conn.commit()
 			if soup.table.find_all('a')[-1].contents != [u'Older >'] or end_data == 1:
 				time.sleep(60* 60)
 				next_page = "?page=0"
@@ -138,8 +142,8 @@ def urlcrawl(url_prefix, url_surffix):
 			print e
 			time.sleep(10*60)
 			# return 
-		except Exception as e:
-			print e
+	#	except Exception as e:
+	#		print e
 			#sys.stdout.write(sys.exc_info()
 			# return 
 		# 	return False

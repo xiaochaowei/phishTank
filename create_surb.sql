@@ -1,4 +1,5 @@
-use PhishTank
+use PhishTank;
+drop table  if exists phishTank;
 CREATE TABLE phishTank(
 	phish_id integer primary key,
 	url varchar(255) not null,
