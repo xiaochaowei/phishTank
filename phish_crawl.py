@@ -8,7 +8,7 @@ import datetime
 conn = MySQLdb.connect(user = "root", passwd = "19920930", db = "PhishTank")
 cursor = conn.cursor()
 # SELECTSQL = """ SELECT phish_id, DATE_FORMAT(submission_time ,"%Y-%m-%d") FROM phishTank WHERE phish_id = "{phish_id}" ; """
-UPDATESQL = """ UPDATE phishTank SET url = "{url}", submission_time = "{submission_time}", valid = "{valid}" , online = "{online}"; """
+UPDATESQL = """ UPDATE phishTank  SET url = "{url}", submission_time = "{submission_time}", valid = "{valid}" , online = "{online}" WHERE phish_id = {phish_id}; """
 QUERYSQL =  """ SELECT 	phish_id, url, submission_time, valid, online FROM phishTank where phish_id = {phish_id}; """ 
 INSERTSQL = """ INSERT INTO phishTank(phish_id, url, submission_time, valid, online) values ({phish_id}, "{url}", "{submission_time}", "{valid}", "{online}"); """ 
 def extractDate(date_str):
@@ -110,13 +110,12 @@ def urlcrawl(url_prefix, url_surffix):
 						comment_sql = UPDATESQL.format(submission_time = submission_time,\
 							url = page_url,\
 							valid = valid,\
-							online = online)
+							online = online,\
+							phish_id = phish_id)
 						#savePicture(str(phish_id)+"_"+str(len(row[3].split("|") ) ), img_url)
 						cursor.execute(comment_sql)
 						conn.commit()
 				else:
-					print online 
-					print valid
 					comment_sql = INSERTSQL.format(phish_id = phish_id, \
 						submission_time = submission_time,\
 						url = page_url,\
@@ -133,6 +132,7 @@ def urlcrawl(url_prefix, url_surffix):
 				next_page = soup.table.find_all('a')[-1]['href']
 			#sys.stdout.write(next_page)
 			url = url_prefix + next_page
+			print next_page
 	#		return urlcrawl(url_prefix, next_page)
 		except urllib2.HTTPError as e:
 			print e
