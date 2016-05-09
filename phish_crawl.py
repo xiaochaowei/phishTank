@@ -85,10 +85,11 @@ def urlcrawl(url_prefix, url_surffix):
 				ins = item[i].find_all('td')
 				phish_id = ins[0].a.contents[0]
 				submission_time = extractDate(ins[1].span.contents[0])
-				if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2010":
+				print submission_time
+				if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2012":
 					end_data = 1
 					break
-				page_url = ins[1].get_text().split(" ")[0][:-5]
+				page_url = ins[1].get_text().split(" ")[0][:-5].encode('utf-8')
 				valid = ins[3].get_text()
 				online = ins[4].get_text()
 				img_url = "https://www.phishtank.com/phish_detail.php?phish_id=" + str(phish_id)
@@ -116,6 +117,7 @@ def urlcrawl(url_prefix, url_surffix):
 						cursor.execute(comment_sql)
 						conn.commit()
 				else:
+					print phish_id
 					comment_sql = INSERTSQL.format(phish_id = phish_id, \
 						submission_time = submission_time,\
 						url = page_url,\
@@ -150,6 +152,6 @@ def urlcrawl(url_prefix, url_surffix):
 
 
 url = "https://www.phishtank.com/phish_archive.php"
-surffix = "?page=0"
+surffix = "?page=9949"
 urlcrawl(url, surffix)
 
