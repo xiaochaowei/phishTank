@@ -42,7 +42,6 @@ def savePicture(filename, url):
 		iframe = soup.find('iframe')
 		suffix = iframe['src']
 		image_url = "http://www.phishtank.com/" + suffix
-		print image_url
 		req = urllib2.Request(image_url, None, req_header)
 		resp = urllib2.urlopen(req, None, req_timeout)
 		if resp.headers.get('content-encoding') == "gzip":
@@ -108,12 +107,9 @@ def urlcrawl(url_prefix, url_surffix):
 						online = row[4] + "|" + online
 						if submission_time != row[2].split("|")[-1]:
 							flag = 1
+							print "PhishID: ", phish_id
 						submission_time = row[2] + "|" + submission_time
 						page_url = row[1] + "|" + page_url
-						print page_url
-						print online
-						print valid
-						print submission_time
 						comment_sql = UPDATESQL.format(submission_time = submission_time,\
 							url = page_url,\
 							valid = valid,\
@@ -124,7 +120,6 @@ def urlcrawl(url_prefix, url_surffix):
 						cursor.execute(comment_sql)
 						conn.commit()
 				else:
-					print phish_id
 					comment_sql = INSERTSQL.format(phish_id = phish_id, \
 						submission_time = submission_time,\
 						url = page_url,\
@@ -151,14 +146,12 @@ def urlcrawl(url_prefix, url_surffix):
 			print e
 			time.sleep(10*60)
 			# return 
-	#	except Exception as e:
-	#		print e
-			#sys.stdout.write(sys.exc_info()
-			# return 
-		# 	return False
+		except Exception as e:
+			print e
+			return False
 
 
-url = "https://www.phishtank.com/phish_archive.php"
+url = "https://www.phishtank.com/phish_search.php"
 surffix = "?page=0&valid=y&Search=Search"
 urlcrawl(url, surffix)
 
