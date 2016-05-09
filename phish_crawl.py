@@ -8,13 +8,14 @@ import datetime
 conn = MySQLdb.connect(user = "root", passwd = "19920930", db = "PhishTank")
 cursor = conn.cursor()
 # SELECTSQL = """ SELECT phish_id, DATE_FORMAT(submission_time ,"%Y-%m-%d") FROM phishTank WHERE phish_id = "{phish_id}" ; """
-UPDATESQL = """ UPDATE phishTank  SET url = "{url}", submission_time = "{submission_time}", valid = "{valid}" , online = "{online}" WHERE phish_id = {phish_id}; """
-QUERYSQL =  """ SELECT 	phish_id, url, submission_time, valid, online FROM phishTank where phish_id = {phish_id}; """ 
-INSERTSQL = """ INSERT INTO phishTank(phish_id, url, submission_time, valid, online) values ({phish_id}, "{url}", "{submission_time}", "{valid}", "{online}"); """ 
+UPDATESQL = """ UPDATE phishTank2  SET url = "{url}", submission_time = "{submission_time}", valid = "{valid}" , online = "{online}", flag = {flag} WHERE phish_id = {phish_id}; """
+QUERYSQL =  """ SELECT 	phish_id, url, submission_time, valid, online FROM phishTank2 where phish_id = {phish_id}; """ 
+INSERTSQL = """ INSERT INTO phishTank2(phish_id, url, submission_time, valid, online) values ({phish_id}, "{url}", "{submission_time}", "{valid}", "{online}"); """ 
 def extractDate(date_str):
 	tmp = date_str.split(" ")
-	date_format = """{month} {day} {year}"""
-	return datetime.datetime.strptime(date_format.format(month = tmp[2], day = tmp[3][:-2], year = tmp[4]), "%b %d %Y").strftime("%Y-%m-%d")
+	date_format = """{month} {day} {year} {time} {eq}"""
+	time_str = date_format.format(month = tmp[2], day = tmp[3][:-2], year = tmp[4], time = tmp[5], eq = tmp[6])
+	return datetime.datetime.strptime(time_str, "%b %d %Y %I:%M %p").strftime("%Y-%m-%d %I:%M %p")
 
 def ungzip(data):		
 	buf = StringIO(data)		
@@ -82,14 +83,17 @@ def urlcrawl(url_prefix, url_surffix):
 			table = soup.table
 			item = table.find_all('tr')
 			for i in range(1,len(item)):
+				flag = 0
 				ins = item[i].find_all('td')
 				phish_id = ins[0].a.contents[0]
 				submission_time = extractDate(ins[1].span.contents[0])
-				print submission_time
-				if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2012":
-					end_data = 1
-					break
+				# print submission_time
+				# if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2012":
+					# end_data = 1
+					# break
 				page_url = ins[1].get_text().split(" ")[0][:-5].encode('utf-8')
+				page_url = page_url[page_url.find("//")+2:]
+				page_url = page_url[:page_url.find("/")]
 				valid = ins[3].get_text()
 				online = ins[4].get_text()
 				img_url = "https://www.phishtank.com/phish_detail.php?phish_id=" + str(phish_id)
@@ -102,6 +106,8 @@ def urlcrawl(url_prefix, url_surffix):
 					if row[3].split("|")[-1] != valid or row[4].split("|")[-1] != online or row[1].split("|")[-1] != page_url:
 						valid = row[3] + "|" + valid
 						online = row[4] + "|" + online
+						if submission_time != row[2].split("|")[-1]:
+							flag = 1
 						submission_time = row[2] + "|" + submission_time
 						page_url = row[1] + "|" + page_url
 						print page_url
@@ -112,8 +118,9 @@ def urlcrawl(url_prefix, url_surffix):
 							url = page_url,\
 							valid = valid,\
 							online = online,\
-							phish_id = phish_id)
-						#savePicture(str(phish_id)+"_"+str(len(row[3].split("|") ) ), img_url)
+							phish_id = phish_id,\
+							flag = flag)
+						savePicture(str(phish_id)+"_"+str(len(row[3].split("|") ) ), img_url)
 						cursor.execute(comment_sql)
 						conn.commit()
 				else:
@@ -123,18 +130,18 @@ def urlcrawl(url_prefix, url_surffix):
 						url = page_url,\
 						valid = valid,\
 						online = online)
-					#savePicture(str(phish_id), img_url)
+					savePicture(str(phish_id), img_url)
 					cursor.execute(comment_sql)
 					conn.commit()
 			if soup.table.find_all('a')[-1].contents != [u'Older >'] or end_data == 1:
 				time.sleep(60* 60)
-				next_page = "?page=0"
+				next_page = "?page=0&valid=y&Search=Search"
 				print "new loop"
 			else:
 				next_page = soup.table.find_all('a')[-1]['href']
 			#sys.stdout.write(next_page)
 			url = url_prefix + next_page
-			print next_page
+			print url
 	#		return urlcrawl(url_prefix, next_page)
 		except urllib2.HTTPError as e:
 			print e
@@ -152,6 +159,6 @@ def urlcrawl(url_prefix, url_surffix):
 
 
 url = "https://www.phishtank.com/phish_archive.php"
-surffix = "?page=9949"
+surffix = "?page=0&valid=y&Search=Search"
 urlcrawl(url, surffix)
 
