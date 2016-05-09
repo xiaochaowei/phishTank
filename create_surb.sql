@@ -1,5 +1,5 @@
 use PhishTank;
-drop table  if exists phishTank;
+drop table  if exists phishTank2;
 CREATE TABLE phishTank2(
 	phish_id integer primary key,
 	url varchar(1028) charset utf8 not null,
@@ -10,5 +10,5 @@ CREATE TABLE phishTank2(
 	flag integer(1)
 );
 
-CREATE TRIGGER insertphishTank
+CREATE TRIGGER insertphishTank2
 BEFORE INSERT on phishTank2 FOR EACH ROW SET NEW.flag = 0;
