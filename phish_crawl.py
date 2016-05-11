@@ -79,7 +79,7 @@ def urlcrawl(url_prefix, url_surffix):
 				source = ungzip(resp.read())
 			else:
 				source = resp.read()
-			soup = BeautifulSoup(source,'html.parser')
+			soup = BeautifulSoup(source)
 			table = soup.table
 			item = table.find_all('tr')
 			for i in range(1,len(item)):
@@ -89,10 +89,8 @@ def urlcrawl(url_prefix, url_surffix):
 					ins = item[i].find_all('td')
 					phish_id = ins[0].a.contents[0]
 					print phish_id
-					print ins
 					submission_time = extractDate(ins[1].span.contents[0])
 					print submission_time
-					# print submission_time
 					# if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2012":
 						# end_data = 1
 						# break
@@ -103,9 +101,7 @@ def urlcrawl(url_prefix, url_surffix):
 					online = ins[4].get_text()
 				except Exception as  e:
 					print e
-					print str(i),":",len(item)
 					continue
-				print "here2"
 				img_url = "https://www.phishtank.com/phish_detail.php?phish_id=" + str(phish_id)
 				comment_sql = QUERYSQL.format(phish_id = phish_id)
 				cursor.execute(comment_sql)
