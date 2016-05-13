@@ -88,12 +88,12 @@ def urlcrawl(url_prefix, url_surffix):
 				try:
 					ins = item[i].find_all('td')
 					phish_id = ins[0].a.contents[0]
-					print phish_id
+				#	print phish_id
 					submission_time = extractDate(ins[1].span.contents[0])
-					print submission_time
-					# if datetime.datetime.strptime(submission_time, "%Y-%m-%d").year == "2012":
-						# end_data = 1
-						# break
+				#	print submission_time
+					if datetime.datetime.strptime(submission_time, "%Y-%m-%d %I:%M %p").year == "2012":
+						end_data = 1
+						break
 					page_url = ins[1].get_text().split(" ")[0][:-5].encode('utf-8')
 					page_url = page_url[page_url.find("//")+2:]
 					page_url = page_url[:page_url.find("/")]
@@ -139,7 +139,6 @@ def urlcrawl(url_prefix, url_surffix):
 				print "new Loop"
 				time.sleep(60* 60)
 				next_page = "?page=0&valid=y&Search=Search"
-				print "new loop"
 			else:
 				next_page = soup.table.find_all('a')[-1]['href']
 
@@ -161,6 +160,6 @@ def urlcrawl(url_prefix, url_surffix):
 
 
 url = "https://www.phishtank.com/phish_search.php"
-surffix = "?page=8644&valid=y&Search=Search"
+surffix = "?page=11000&valid=y&Search=Search"
 urlcrawl(url, surffix)
 
