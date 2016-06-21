@@ -160,6 +160,6 @@ def urlcrawl(url_prefix, url_surffix):
 
 
 url = "https://www.phishtank.com/phish_search.php"
-surffix = "?page=11000&valid=y&Search=Search"
+surffix = "?page=1&valid=y&Search=Search"
 urlcrawl(url, surffix)
 
