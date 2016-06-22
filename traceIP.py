@@ -4,7 +4,7 @@ import gzip
 from StringIO import StringIO
 import MySQLdb
 PREFIX = "http://www.securityspace.com/sprobe/doprobe.html?URL="
-conn = MySQLdb.connect(user = "root", passwd = "19920930", db = "phishTank")
+conn = MySQLdb.connect(user = "root", passwd = "19920930", db = "PhishTank")
 cursor = conn.cursor()
 def ungzip(data):		
 	buf = StringIO(data)		
