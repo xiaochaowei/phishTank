@@ -56,19 +56,28 @@ def urlcrawl(url):
 	# 	print ins
 
 INSERT_SQL = """ INSERT INTO traceip(date, ip, server, phish_id) VALUES ("{date}", "{ip}", "{server}", {phish_id}) ;""" 
-QUERY_SQL = """SELECT distinct(url), phish_id FROM phishTank2 WHERE valid like "%VALID PHISH%" and online like "%ONLINE%"; """ 
+QUERY_SQL = """SELECT distinct(url), phish_id, trace FROM phishTank2 WHERE valid like "%VALID PHISH%" and online like "%ONLINE%"; """ 
+UPDATE_TRACE_SQL= """UPDATE tarceip set trace = "Y" where phish_id = {phish_id} ;""" 
 comment_sql = QUERY_SQL
 cursor.execute(comment_sql)
 rows = cursor.fetchall()
 for row in rows:
 	phish_id = row[1]
 	url = row[0]
+	trace - row[2]
+	if trace == "Y":
+		continue
 	str_list = urlcrawl(url)
 	if len(str_list):
+		comment_sql = UPDATE_TRACE_SQL.format(phish_id = phish_id)
+		cursor.execute(comment_sql)
+		conn.commit()
 		continue
 	else:
 		for tmp_str in str_list:
 			tmp = tmp_str.split(",")
 			comment_sql = INSERT_SQL.format(date = tmp[0], ip = tmp[1], server = tmp[2], phish_id = phish_id)
 			cursor.execute(comment_sql)
+		comment_sql = UPDATE_TRACE_SQL.format(phish_id = phish_id)
+		cursor.execute(comment_sql)
 		conn.commit()
